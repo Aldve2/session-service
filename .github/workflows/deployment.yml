@@ -70,9 +70,6 @@ jobs:
           echo "Updating task definition with Neo4j configuration..."
           jq --arg IMAGE "${{ env.IMAGE_NAME }}" \
              --arg NAME "${{ env.CONTAINER_NAME }}" \
-             --arg NEO4J_IP "${{ secrets.NEO4J_IP }}" \
-             --arg NEO4J_USERNAME "${{ secrets.NEO4J_USERNAME }}" \
-             --arg NEO4J_PASSWORD "${{ secrets.NEO4J_PASSWORD }}" \
              'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy) |
              .containerDefinitions |= map(
                if .name == $NAME then 
