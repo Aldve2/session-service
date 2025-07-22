@@ -6,5 +6,5 @@ spring:
     name: session-service
   data:
     redis:
-      host: ${REDIS_IP}
+      host: 44.204.243.229
       port: 6379
