@@ -49,16 +49,20 @@ jobs:
 
       - name: Build and push Docker image
         if: steps.verify-aws.outcome == 'success'
+        id: docker-build
         run: |
           docker build -t ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} .
           docker push ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
-
+          echo "IMAGE_NAME=${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}" >> $GITHUB_ENV
       - name: Get current task definition
         if: steps.verify-aws.outcome == 'success'
+        id: get-task-def
         run: |
+          echo "Getting current task definition..."
           aws ecs describe-task-definition \
             --task-definition ${{ env.ECS_TASK_DEFINITION }} \
             --query 'taskDefinition' > task-definition.json
+          echo "✓ Task definition retrieved"
 
       - name: Update task definition
         if: steps.verify-aws.outcome == 'success'
