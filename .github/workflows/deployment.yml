@@ -60,21 +60,29 @@ jobs:
             --task-definition ${{ env.ECS_TASK_DEFINITION }} \
             --query 'taskDefinition' > task-definition.json
 
-      - name: Update task definition with REDIS configuration
+      - name: Update task definition
         if: steps.verify-aws.outcome == 'success'
+        id: update-task-def
         run: |
-          jq --arg IMAGE "${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}" \
+          echo "Updating task definition with Neo4j configuration..."
+          jq --arg IMAGE "${{ env.IMAGE_NAME }}" \
              --arg NAME "${{ env.CONTAINER_NAME }}" \
              --arg REDIS_IP "${{ secrets.REDIS_IP }}" \
              'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy) |
-              .containerDefinitions |= map(
-                if .name == $NAME then 
-                  .image = $IMAGE |
-                  (.environment //= []) |
-                  (.environment |= map(select(.name != "REDIS_IP")) + [{ "name": "REDIS_IP", "value": $REDIS_IP }])
-                else . end
-              )' \
+             .containerDefinitions |= map(
+               if .name == $NAME then 
+                 .image = $IMAGE |
+                 .environment += [
+                   {
+                     "name": "REDIS_IP",
+                     "value": $REDIS_IP
+                   }
+                 ]
+               else . end
+             ) |
+             if .executionRoleArn == null then del(.executionRoleArn) else . end' \
              task-definition.json > updated-task-definition.json
+          echo "✓ Task definition updated with Neo4j configuration"
 
       - name: Register new task definition
         if: steps.verify-aws.outcome == 'success'
