@@ -8,6 +8,7 @@ import yps.systems.ai.repository.ISessionRepository;
 import java.util.List;
 import java.util.UUID;
 
+@CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.GET})
 @RestController
 @RequestMapping("/sessionService")
 public class SessionController {
